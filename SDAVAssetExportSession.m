@@ -114,7 +114,17 @@
         }
         else
         {
-            self.videoOutput.videoComposition = [self buildDefaultVideoComposition];
+			AVMutableVideoComposition *maybeComposition = [self buildDefaultVideoComposition];
+			if (maybeComposition != nil) {
+				self.videoOutput.videoComposition = maybeComposition;
+			} else {
+				_error = [NSError errorWithDomain:AVFoundationErrorDomain
+											 code:AVErrorExportFailed
+										 userInfo:@{ NSLocalizedDescriptionKey: @"Couldn't create video composition, try another input video" }];
+				handler();
+
+				return;
+			}
         }
         if ([self.reader canAddOutput:self.videoOutput])
         {
@@ -337,6 +347,11 @@
 		naturalSize.width = naturalSize.height;
 		naturalSize.height = width;
 	}
+
+	if (naturalSize.width < 0 || naturalSize.height < 0) {
+		return nil;
+	}
+
 	videoComposition.renderSize = naturalSize;
 	// center inside
 	{
