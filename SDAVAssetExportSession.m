@@ -145,21 +145,7 @@
     //
     //Audio output
     //
-    // Mono and stereo tracks only: the iPhone 16/17 Pro camera records spatial audio as an extra
-    // 4-channel track (`apac`, or LPCM in ProRes) next to the stereo one. The audio mix output fails
-    // on `apac` (-11800/-12780) and would double the sound with LPCM. Which of the two is flagged
-    // enabled varies (an edit in Photos flips it), so the flag isn't used.
-    NSArray *allAudioTracks = [self.asset tracksWithMediaType:AVMediaTypeAudio];
-    NSArray *audioTracks = [allAudioTracks filteredArrayUsingPredicate:
-                            [NSPredicate predicateWithBlock:^BOOL(AVAssetTrack *track, NSDictionary *bindings) {
-        CMAudioFormatDescriptionRef description = (__bridge CMAudioFormatDescriptionRef)track.formatDescriptions.firstObject;
-        const AudioStreamBasicDescription *format = description ? CMAudioFormatDescriptionGetStreamBasicDescription(description) : NULL;
-        return format && format->mChannelsPerFrame <= 2;
-    }]];
-    if (audioTracks.count == 0) {
-        // Multichannel audio only (e.g. 5.1): keep it rather than export a silent video.
-        audioTracks = allAudioTracks;
-    }
+    NSArray *audioTracks = self.audioTracks ?: [self.asset tracksWithMediaType:AVMediaTypeAudio];
     if (audioTracks.count > 0) {
       self.audioOutput = [AVAssetReaderAudioMixOutput assetReaderAudioMixOutputWithAudioTracks:audioTracks audioSettings:nil];
       self.audioOutput.alwaysCopiesSampleData = NO;

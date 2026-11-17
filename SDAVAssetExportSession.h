@@ -55,6 +55,13 @@
 @property (nonatomic, copy) AVAudioMix *audioMix;
 
 /**
+ * The asset's audio tracks to export, mixed into one.
+ *
+ * A value of nil exports every audio track of the asset; an empty array exports no audio.
+ */
+@property (nonatomic, copy) NSArray<AVAssetTrack *> *audioTracks;
+
+/**
  * The type of file to be written by the session.
  *
  * The value is a UTI string corresponding to the file type to use when writing the asset.
